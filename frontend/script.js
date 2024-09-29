@@ -97,3 +97,23 @@ function displayProducts(products) {
         productList.appendChild(productElement);
     });
 }
+
+function displayCategoryTable(products) {
+    categoryTableBody.innerHTML = '';
+
+    const categoryCounts = products.reduce((acc, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+    }, {});
+
+    const sortedCategories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+
+    sortedCategories.forEach(([category, count]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${category}</td>
+            <td>${count}</td>
+        `;
+        categoryTableBody.appendChild(row);
+    });
+}

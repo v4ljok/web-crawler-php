@@ -117,3 +117,35 @@ function displayCategoryTable(products) {
         categoryTableBody.appendChild(row);
     });
 }
+
+function renderCategoryChart(products) {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const categoryCounts = products.reduce((acc, product) => {
+        acc[product.category] = (acc[product.category] || 0) + 1;
+        return acc;
+    }, {});
+
+    if (categoryChartInstance) {
+        categoryChartInstance.destroy();
+    }
+
+    categoryChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(categoryCounts),
+            datasets: [{
+                label: 'Number of Products',
+                data: Object.values(categoryCounts),
+                backgroundColor: 'orange',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}

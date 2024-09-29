@@ -23,3 +23,6 @@ function getHTMLContent($url) {
     curl_close($ch);
     return $htmlContent;
 }
+
+$urlFilePath = __DIR__ . '/data/urls.txt';
+$scrapingUrl = file_exists($urlFilePath) ? trim(file_get_contents($urlFilePath)) : SCRAPING_URL;

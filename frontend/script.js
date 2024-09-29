@@ -149,3 +149,43 @@ function renderCategoryChart(products) {
         }
     });
 }
+
+function renderRatingChart(products) {
+    const ctx = document.getElementById('ratingChart').getContext('2d');
+    const ratingByCategory = products.reduce((acc, product) => {
+        if (!acc[product.category]) {
+            acc[product.category] = { totalRating: 0, count: 0 };
+        }
+        acc[product.category].totalRating += parseFloat(product.rating) || 0;
+        acc[product.category].count += 1;
+        return acc;
+    }, {});
+
+    const categories = Object.keys(ratingByCategory);
+    const averageRatings = categories.map(cat => (ratingByCategory[cat].totalRating / ratingByCategory[cat].count));
+
+    if (ratingChartInstance) {
+        ratingChartInstance.destroy();
+    }
+
+    ratingChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'Average Rating',
+                data: averageRatings,
+                backgroundColor: 'lightgreen',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 5
+                }
+            }
+        }
+    });
+}

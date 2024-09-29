@@ -9,3 +9,50 @@ const loadButton = document.getElementById('load-button');
 let isLoading = false;
 let categoryChartInstance = null;
 let ratingChartInstance = null;
+
+async function fetchProducts() {
+    if (isLoading) return;
+
+    isLoading = true;
+    loadButton.disabled = true;
+
+    try {
+        document.querySelectorAll('.placeholder-row, .chart-placeholder, .placeholder-text').forEach(element => {
+            element.classList.add('skeleton-loading');
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const products = await response.json();
+
+        if (products.error) {
+            showError(products.error);
+            return;
+        }
+
+        allProducts = products;
+        
+        displayProducts(products);
+        displayCategoryTable(products);
+        renderCategoryChart(products);
+        renderRatingChart(products);
+    } catch (error) {
+        showError('Failed to fetch products. Please check the API_URL to match your server\'s domain and port.');
+        console.error(error);
+    } finally {
+        document.querySelectorAll('.skeleton-loading').forEach(element => {
+            element.classList.remove('skeleton-loading');
+        });
+        isLoading = false;
+    }
+
+    document.getElementById('categoryChart').style.display = 'block';
+    document.getElementById('ratingChart').style.display = 'block';
+    document.getElementById('categoryChartPlaceholder').style.display = 'none';
+    document.getElementById('ratingChartPlaceholder').style.display = 'none'; 
+}

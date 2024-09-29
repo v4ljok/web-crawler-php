@@ -58,3 +58,69 @@ if (empty($categories)) {
     echo json_encode(['error' => 'No categories found on the website']);
     exit;
 }
+
+$allProducts = [];
+foreach ($categories as $category) {
+    $categoryName = $category['name'];
+    $categoryUrl = $category['url'];
+
+    $categoryContent = getHTMLContent($categoryUrl);
+    if (!$categoryContent) {
+        continue;
+    }
+
+    $categoryDom = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $categoryDom->loadHTML($categoryContent);
+    libxml_clear_errors();
+
+    $categoryXPath = new DOMXPath($categoryDom);
+    $productNodes = $categoryXPath->query("//div[contains(@class, 'product')]");
+
+    foreach ($productNodes as $node) {
+        $titleNode = $categoryXPath->query(".//h4", $node);
+        $priceNode = $categoryXPath->query(".//span[contains(@class, 'price')]", $node);
+        $productLinkNode = $categoryXPath->query(".//a", $node);
+
+        $title = $titleNode->length > 0 ? trim($titleNode->item(0)->nodeValue) : 'No title';
+        $price = $priceNode->length > 0 ? trim($priceNode->item(0)->nodeValue) : 'No price';
+        $productLink = $productLinkNode->length > 0 ? $productLinkNode->item(0)->getAttribute('href') : '';
+
+        if (strpos($productLink, 'http') === false) {
+            $baseUrl = parse_url($scrapingUrl, PHP_URL_SCHEME) . '://' . parse_url($scrapingUrl, PHP_URL_HOST);
+            $productLink = $baseUrl . '/' . ltrim(preg_replace('#^/et/catalog/[^/]+#', '', $productLink), '/');
+        }
+
+        $productContent = getHTMLContent($productLink);
+        $rating = 'No rating';
+        $availability = 'In Stock';
+
+        if ($productContent) {
+            $productDom = new DOMDocument();
+            libxml_use_internal_errors(true);
+            $productDom->loadHTML($productContent);
+            libxml_clear_errors();
+
+            $productXPath = new DOMXPath($productDom);
+            
+            $ratingNode = $productXPath->query("//span[contains(@class, 'rating') or contains(@class, 'star-rating')]");
+            if ($ratingNode->length > 0) {
+                $rating = trim($ratingNode->item(0)->nodeValue);
+            }
+
+            $availabilityNode = $productXPath->query("//*[contains(text(), 'Нет в наличии') or contains(text(), 'Out of stock') or contains(text(), 'Ei ole laos')]");
+            if ($availabilityNode->length > 0) {
+                $availability = 'Out of Stock';
+            }
+        }
+
+        $allProducts[] = [
+            'title' => $title,
+            'price' => $price,
+            'category' => $categoryName,
+            'link' => $productLink,
+            'rating' => $rating,
+            'availability' => $availability
+        ];
+    }
+}

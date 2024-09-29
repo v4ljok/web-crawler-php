@@ -124,3 +124,11 @@ foreach ($categories as $category) {
         ];
     }
 }
+
+if (empty($allProducts)) {
+    echo json_encode(['error' => 'No products found across all categories']);
+} else {
+    echo json_encode($allProducts);
+}
+
+?>

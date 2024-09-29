@@ -26,3 +26,9 @@ function getHTMLContent($url) {
 
 $urlFilePath = __DIR__ . '/data/urls.txt';
 $scrapingUrl = file_exists($urlFilePath) ? trim(file_get_contents($urlFilePath)) : SCRAPING_URL;
+
+$htmlContent = getHTMLContent($scrapingUrl);
+if (!$htmlContent) {
+    echo json_encode(['error' => 'Failed to retrieve content from the website']);
+    exit;
+}

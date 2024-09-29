@@ -69,3 +69,31 @@ function searchProducts() {
     );
     displayProducts(filteredProducts);
 }
+
+function displayProducts(products) {
+    productList.innerHTML = '';
+
+    if (products.length === 0) {
+        productList.innerHTML = '<p>No products found.</p>';
+        return;
+    }
+
+    products.forEach(product => {
+        const productElement = document.createElement('div');
+        productElement.classList.add('product-item');
+        
+        const productRating = product.rating && product.rating !== 'No rating' ? `${product.rating} ⭐` : 'No rating available';
+        const availability = product.availability ? product.availability : 'Unknown';
+
+        productElement.innerHTML = `
+            <h3>${product.title}</h3>
+            <p>Price: ${product.price}</p>
+            <p>Category: ${product.category}</p>
+            <p>Rating: ${productRating}</p>
+            <p>Availability: ${availability}</p>
+            <a href="${product.link}" target="_blank">View Product</a>
+        `;
+
+        productList.appendChild(productElement);
+    });
+}

@@ -32,3 +32,29 @@ if (!$htmlContent) {
     echo json_encode(['error' => 'Failed to retrieve content from the website']);
     exit;
 }
+
+$dom = new DOMDocument();
+libxml_use_internal_errors(true);
+$dom->loadHTML($htmlContent);
+libxml_clear_errors();
+
+$xpath = new DOMXPath($dom);
+$categoryNodes = $xpath->query("//div[@id='tea-cats']//a");
+
+$categories = [];
+foreach ($categoryNodes as $categoryNode) {
+    $categoryName = trim($categoryNode->nodeValue);
+    $categoryUrl = $categoryNode->getAttribute('href');
+    if (strpos($categoryUrl, 'http') === false) {
+        $categoryUrl = rtrim($scrapingUrl, '/') . '/' . ltrim($categoryUrl, '/');
+    }
+    $categories[] = [
+        'name' => $categoryName,
+        'url' => $categoryUrl
+    ];
+}
+
+if (empty($categories)) {
+    echo json_encode(['error' => 'No categories found on the website']);
+    exit;
+}

@@ -56,3 +56,16 @@ async function fetchProducts() {
     document.getElementById('categoryChartPlaceholder').style.display = 'none';
     document.getElementById('ratingChartPlaceholder').style.display = 'none'; 
 }
+
+function showError(message) {
+    alert(message);
+}
+
+function searchProducts() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filteredProducts = allProducts.filter(product => 
+        product.title.toLowerCase().includes(searchTerm) ||
+        product.category.toLowerCase().includes(searchTerm)
+    );
+    displayProducts(filteredProducts);
+}
